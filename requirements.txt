@@ -1,0 +1,10 @@
+streamlit
+openai
+python-dotenv
+pandas
+requests
+beautifulsoup4
+nltk
+transformers
+huggingface_hub
+plotly
