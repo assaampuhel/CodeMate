@@ -1,11 +1,10 @@
-
-
 import streamlit as st
 import pandas as pd
 import datetime
 import json
 import os
 import sqlite3
+from datetime import date
 
 DB_PATH = "data/user_data.db"
 
@@ -46,6 +45,19 @@ def load_user_plan(username):
     conn.close()
     return row
 
+def log_study_session(username, study_date):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS study_log (
+            username TEXT,
+            study_date TEXT
+        )
+    ''')
+    c.execute("INSERT INTO study_log (username, study_date) VALUES (?, ?)", (username, study_date))
+    conn.commit()
+    conn.close()
+
 def show_planner():
     st.title("📅 Personalized Study Planner")
 
@@ -80,6 +92,10 @@ def show_planner():
         st.markdown(f"**Total Days:** {user_plan[5]}")
 
         plan_data = json.loads(user_plan[6])
+        today_str = str(date.today())
+        if today_str in plan_data:
+            log_study_session(username, today_str)
+            st.success("✅ Today's study session has been automatically logged.")
         df = pd.DataFrame(list(plan_data.items()), columns=["Date", "Topic"])
         st.dataframe(df, use_container_width=True)
 
